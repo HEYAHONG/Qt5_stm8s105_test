@@ -1,11 +1,24 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#ifdef WIN32
+ #include <windows.h>
+ #include <conio.h> // for console I/O
+ #define sleep(x) Sleep(1000 * (x))
+ #define msleep(x) Sleep(x)
+ #define CLEAR_TERM system("CLS");
+#else
+ #include <unistd.h>
+ #define msleep(x) usleep(1000 * (x))
+ #define CLEAR_TERM system("clear");
+#endif
+
 #include <queue>
 #include <QMainWindow>
 #include <QDebug>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
+#include <QScrollBar>
 
 namespace Ui {
 class MainWindow;
@@ -20,14 +33,27 @@ public:
     ~MainWindow();
     void UpdateComInfo();
     QSerialPort *SerialPort;
+    unsigned int CRC16(unsigned char * arr_buff,unsigned char len);
+    //读写STM8的EEPROM
+    unsigned char WriteToStm8(unsigned int address,unsigned char data);
+    unsigned char ReadFromStm8(unsigned int address);
+    //当前读取的地址
+    unsigned int curr_address;
+    bool  IsReceived;
 
 
 private:
     Ui::MainWindow *ui;
+    //STM8从站地址
+    unsigned char Stm8_addr;
+    //从STM8读取的数据将存在此数组
+    unsigned char data_buff[1200];
 public slots:
     void OpenCom();
     void CloseCom();
     void readyRead(); //串口可以读
+    void ReadBtn();
+    void WriteBtn();
 };
 
 #endif // MAINWINDOW_H
