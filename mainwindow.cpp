@@ -395,6 +395,7 @@ void MainWindow::status_stop_timerbtn()
      ui->status_beep_on->setEnabled(true);
      ui->status_relay_off->setEnabled(true);
      ui->status_relay_on->setEnabled(true);
+     ui->status_time_update->setEnabled(true);
 }
 void MainWindow::status_start_timerbtn()
 {
@@ -405,6 +406,7 @@ void MainWindow::status_start_timerbtn()
     ui->status_beep_on->setEnabled(false);
     ui->status_relay_off->setEnabled(false);
     ui->status_relay_on->setEnabled(false);
+     ui->status_time_update->setEnabled(false);
 }
 
 
