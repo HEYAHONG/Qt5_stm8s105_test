@@ -21,6 +21,7 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QTime>
+#include <QFile>
 
 namespace Ui {
 class MainWindow;
@@ -71,6 +72,8 @@ public slots:
     void status_relay_off();
     void status_time_update();
     void status_time_update_timeout();
+    void loaddata_buff();
+    void savedata_buff();
 };
 
 #endif // MAINWINDOW_H

@@ -531,6 +531,32 @@
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="loaddata_buff">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>从文件加载内存数据</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="savedata_buff">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>10</y>
+      <width>161</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>保存内存数据到文件</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

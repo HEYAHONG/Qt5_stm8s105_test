@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->status_relay_on,SIGNAL(clicked()),this,SLOT(status_relay_on()));
     connect(ui->status_relay_off,SIGNAL(clicked()),this,SLOT(status_relay_off()));
     connect(ui->status_time_update,SIGNAL(clicked()),this,SLOT(status_time_update()));
+    connect(ui->loaddata_buff,SIGNAL(clicked()),this,SLOT(loaddata_buff()));
+    connect(ui->savedata_buff,SIGNAL(clicked()),this,SLOT(savedata_buff()));
     connect(status_timer,SIGNAL(timeout()),this,SLOT(status_timer_timeout()));//关联状态窗口定时器
     connect(status_time_update_timer,SIGNAL(timeout()),this,SLOT(status_time_update_timeout()));
     UpdateComInfo();
@@ -41,6 +43,11 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     ui->frame->setEnabled(false);
     ui->frame_1->setEnabled(false);
+    {//清空data_buff
+     unsigned int i=0;
+     for(i=0;i<sizeof(data_buff);i++)
+         data_buff[i]=0;
+    }
 }
 
 MainWindow::~MainWindow()
@@ -492,4 +499,25 @@ void MainWindow::status_time_update_timeout()
       ui->label_12->setText(data_buff[1080]?"开":"关");
      }
     }
+}
+
+void MainWindow::loaddata_buff()
+{
+if(QFile::exists("data.bin"))
+{
+    QFile   temp("data.bin");
+    temp.open(QIODevice::ReadOnly);
+    temp.read((char *)data_buff,sizeof(data_buff));
+
+}
+else
+{
+    QMessageBox::about(NULL,"提示","data不存在");
+}
+}
+void MainWindow::savedata_buff()
+{
+    QFile   temp("data.bin");
+    temp.open(QIODevice::WriteOnly);
+    temp.write((char *)data_buff,sizeof(data_buff));
 }
