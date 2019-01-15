@@ -19,6 +19,8 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QTimer>
+#include <QTime>
 
 namespace Ui {
 class MainWindow;
@@ -48,12 +50,27 @@ private:
     unsigned char Stm8_addr;
     //从STM8读取的数据将存在此数组
     unsigned char data_buff[1200];
+    //状态编辑菜单定时器
+    QTimer *status_timer;
+    QTimer *status_time_update_timer;
 public slots:
     void OpenCom();
     void CloseCom();
     void readyRead(); //串口可以读
     void ReadBtn();
     void WriteBtn();
+    void StatusBtn();
+    //状态编辑菜单超时
+    void status_timer_timeout();
+    void status_exitbtn();
+    void status_stop_timerbtn();
+    void status_start_timerbtn();
+    void status_beep_on();
+    void status_beep_off();
+    void status_relay_on();
+    void status_relay_off();
+    void status_time_update();
+    void status_time_update_timeout();
 };
 
 #endif // MAINWINDOW_H

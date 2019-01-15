@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     SerialPort=new QSerialPort(this);
+    status_timer = new QTimer(this);
+    status_time_update_timer=new QTimer(this);
     Stm8_addr=0x01;
     setWindowTitle("STM8S105");//设置标题
     connect(ui->OpenCom,SIGNAL(clicked()),this,SLOT(OpenCom())); //配置打开按钮
@@ -14,6 +16,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(SerialPort,SIGNAL(readyRead()),this,SLOT(readyRead()));//配置准备读信号
     connect(ui->Write,SIGNAL(clicked()),this,SLOT(WriteBtn()));
     connect(ui->Read,SIGNAL(clicked()),this,SLOT(ReadBtn()));
+    connect(ui->StatusBtn,SIGNAL(clicked()),this,SLOT(StatusBtn()));
+    connect(ui->status_exitbtn,SIGNAL(clicked()),this,SLOT(status_exitbtn()));
+    connect(ui->status_stop_timerbtn,SIGNAL(clicked()),this,SLOT(status_stop_timerbtn()));
+    connect(ui->status_start_timerbtn,SIGNAL(clicked()),this,SLOT(status_start_timerbtn()));
+    connect(ui->status_beep_on,SIGNAL(clicked()),this,SLOT(status_beep_on()));
+    connect(ui->status_beep_off,SIGNAL(clicked()),this,SLOT(status_beep_off()));
+    connect(ui->status_relay_on,SIGNAL(clicked()),this,SLOT(status_relay_on()));
+    connect(ui->status_relay_off,SIGNAL(clicked()),this,SLOT(status_relay_off()));
+    connect(ui->status_time_update,SIGNAL(clicked()),this,SLOT(status_time_update()));
+    connect(status_timer,SIGNAL(timeout()),this,SLOT(status_timer_timeout()));//关联状态窗口定时器
+    connect(status_time_update_timer,SIGNAL(timeout()),this,SLOT(status_time_update_timeout()));
     UpdateComInfo();
     {
      //限制文本框输入内容
@@ -27,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     }
     ui->frame->setEnabled(false);
+    ui->frame_1->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -61,7 +75,6 @@ void MainWindow::UpdateComInfo() //更新串口信息
 
 void MainWindow::OpenCom()
 {
-
 // 设置串口号
  SerialPort->setPortName(ui->cmbPortName->currentText());
  if(SerialPort->open(QIODevice::ReadWrite)) //判断是否打开
@@ -101,6 +114,8 @@ void MainWindow::OpenCom()
      ui->OpenCom->setEnabled(true);
      ui->CloseCom->setEnabled(false);
      ui->frame->setEnabled(false);
+     ui->frame_1->setEnabled(false);
+     status_timer->stop();
  }
 }
 void MainWindow::CloseCom()
@@ -119,6 +134,8 @@ void MainWindow::CloseCom()
        ui->OpenCom->setEnabled(true);
        ui->CloseCom->setEnabled(false);
        ui->frame->setEnabled(false);
+       ui->frame_1->setEnabled(false);
+       status_timer->stop();
    }
 }
 
@@ -159,6 +176,8 @@ if(Data.size()!=0)
     }
 }
 Data.clear();
+SerialPort->clearError();
+SerialPort->clear();
 
 }
 unsigned int MainWindow::CRC16(unsigned char *arr_buff,unsigned char len)
@@ -256,4 +275,221 @@ void MainWindow::WriteBtn()
     unsigned int address=atoi(ui->address->text().toStdString().data());
     unsigned char value=atoi(ui->value->text().toStdString().data());
     WriteToStm8(address,value);
+}
+void MainWindow::status_timer_timeout()
+{
+{//读取数据
+static int timeoutcount=6;
+if(IsReceived || !timeoutcount)//空闲时读取相关参数
+{
+static int count=0;
+switch(count)
+{
+case 0:
+    ReadFromStm8(1030);break;
+case 1:
+    ReadFromStm8(1031);break;
+case 2:
+    ReadFromStm8(1032);break;
+case 3:
+    ReadFromStm8(1040);break;
+case 4:
+    ReadFromStm8(1041);break;
+case 5:
+    ReadFromStm8(1042);break;
+case 6:
+    ReadFromStm8(1050);break;
+case 7:
+    ReadFromStm8(1051);break;
+case 8:
+    ReadFromStm8(1052);break;
+case 9:
+    ReadFromStm8(1053);break;
+case 10:
+    ReadFromStm8(1054);break;
+case 11:
+    ReadFromStm8(1060);break;
+case 12:
+    ReadFromStm8(1061);break;
+case 13:
+    ReadFromStm8(1062);break;
+case 14:
+    ReadFromStm8(1063);break;
+case 15:
+    ReadFromStm8(1064);break;
+case 16:
+    ReadFromStm8(1070);break;
+case 17:
+    ReadFromStm8(1080);break;
+default:
+    count=-1;break;
+}
+count++;
+qDebug() <<"读取序号："<<count;
+timeoutcount=6;
+}
+timeoutcount--;
+}
+
+{//更新窗口状态
+ {//更新时间
+ QTime temp_time;
+ temp_time.setHMS(data_buff[1030]/16*10+data_buff[1030]%16,data_buff[1031]/16*10+data_buff[1031]%16,data_buff[1032]/16*10+data_buff[1032]%16);//填写时间
+ {
+ ui->timeEdit->setMaximumTime(QTime(23,59,59));
+ ui->timeEdit->setMinimumTime(QTime(0,0,0));
+ ui->timeEdit->setUpdatesEnabled(true);
+ }
+ ui->timeEdit->setTime(temp_time);
+   qDebug()<<temp_time.toString("HH:mm:ss");
+ }
+ {//更新温湿度
+  char temp[20];
+  sprintf(temp,"%4.1f度，%4.1f%%",data_buff[1052]+0.1*(data_buff[1053] & 0xf),data_buff[1050]+0.1*(data_buff[1051] & 0xf));
+  ui->label_6->setText(temp);
+ }
+ {//更新ADC数据
+  char temp[20];
+  sprintf(temp,"%d,%s",data_buff[1040]*256+data_buff[1041],(data_buff[1042]?"开":"关"));
+  ui->label_8->setText(temp);
+
+ }
+ {//更新报警和继电器状态
+  ui->label_10->setText(data_buff[1070]?"开":"关");
+  ui->label_12->setText(data_buff[1080]?"开":"关");
+ }
+}
+}
+
+void MainWindow::StatusBtn()
+{
+    ui->frame->setEnabled(false);
+    ui->frame_1->setEnabled(true);
+    //status_timer->start(100);
+    {
+    ui->timeEdit->setMaximumTime(QTime(23,59,59));
+    ui->timeEdit->setMinimumTime(QTime(0,0,0));
+    ui->timeEdit->setUpdatesEnabled(true);
+    }
+
+}
+void MainWindow::status_exitbtn()
+{
+    status_timer->stop();
+    ui->frame->setEnabled(true);
+    ui->frame_1->setEnabled(false);
+}
+void MainWindow::status_stop_timerbtn()
+{
+    status_timer->stop();
+     ui->status_start_timerbtn->setEnabled(true);
+     ui->status_stop_timerbtn->setEnabled(false);
+     ui->status_beep_off->setEnabled(true);
+     ui->status_beep_on->setEnabled(true);
+     ui->status_relay_off->setEnabled(true);
+     ui->status_relay_on->setEnabled(true);
+}
+void MainWindow::status_start_timerbtn()
+{
+    status_timer->start(100);
+    ui->status_start_timerbtn->setEnabled(false);
+    ui->status_stop_timerbtn->setEnabled(true);
+    ui->status_beep_off->setEnabled(false);
+    ui->status_beep_on->setEnabled(false);
+    ui->status_relay_off->setEnabled(false);
+    ui->status_relay_on->setEnabled(false);
+}
+
+
+unsigned status_changeflag=0;//状态窗口中改变的设置类型标志位
+void MainWindow::status_beep_off()
+{
+    data_buff[1070]=0;
+    status_time_update_timer->start(100);
+    status_changeflag=1;
+
+}
+void MainWindow::status_beep_on()
+{
+    data_buff[1070]=1;
+    status_time_update_timer->start(100);
+    status_changeflag=1;
+}
+void MainWindow::status_relay_off()
+{
+    data_buff[1080]=0;
+    status_time_update_timer->start(100);
+    status_changeflag=2;
+}
+void MainWindow::status_relay_on()
+{
+    data_buff[1080]=1;
+    status_time_update_timer->start(100);
+    status_changeflag=2;
+}
+void MainWindow::status_time_update()
+{
+    unsigned char nhour,nminute,nsecond;
+    QTime temp_time=ui->timeEdit->time();
+    nhour=temp_time.hour()/10*16+temp_time.hour()%10;
+    nminute=temp_time.minute()/10*16+temp_time.minute()%10;
+    nsecond=temp_time.second()/10*16+temp_time.second()%10;
+    qDebug()<<nhour<<' '<<nminute<<' '<<nsecond;
+    data_buff[1030]=nhour;
+    data_buff[1031]=nminute;
+    data_buff[1032]=nsecond;
+    status_time_update_timer->start(100);
+    status_changeflag=0;
+
+
+}
+void MainWindow::status_time_update_timeout()
+{
+    static int count=0;
+    switch (count)
+    {
+    case 0:
+       if(status_changeflag ==0) WriteToStm8(1030,data_buff[1030]);  break;
+    case 1:
+       if(status_changeflag ==0) WriteToStm8(1031,data_buff[1031]);break;
+    case 2:
+       if(status_changeflag ==0) WriteToStm8(1032,data_buff[1032]);break;
+    case 3:
+        if(status_changeflag ==1) WriteToStm8(1070,data_buff[1070]);
+    case 4:
+        if(status_changeflag ==2) WriteToStm8(1080,data_buff[1080]);
+    default:
+        count=-1;
+        status_time_update_timer->stop();
+        break;
+    }
+    count++;
+    {//更新窗口状态
+     {//更新时间
+     QTime temp_time;
+     temp_time.setHMS(data_buff[1030]/16*10+data_buff[1030]%16,data_buff[1031]/16*10+data_buff[1031]%16,data_buff[1032]/16*10+data_buff[1032]%16);//填写时间
+     {
+     ui->timeEdit->setMaximumTime(QTime(23,59,59));
+     ui->timeEdit->setMinimumTime(QTime(0,0,0));
+     ui->timeEdit->setUpdatesEnabled(true);
+     }
+     ui->timeEdit->setTime(temp_time);
+       qDebug()<<temp_time.toString("HH:mm:ss");
+     }
+     {//更新温湿度
+      char temp[20];
+      sprintf(temp,"%4.1f度，%4.1f%%",data_buff[1052]+0.1*(data_buff[1053] & 0xf),data_buff[1050]+0.1*(data_buff[1051] & 0xf));
+      ui->label_6->setText(temp);
+     }
+     {//更新ADC数据
+      char temp[20];
+      sprintf(temp,"%d,%s",data_buff[1040]*256+data_buff[1041],(data_buff[1042]?"开":"关"));
+      ui->label_8->setText(temp);
+
+     }
+     {//更新报警和继电器状态
+      ui->label_10->setText(data_buff[1070]?"开":"关");
+      ui->label_12->setText(data_buff[1080]?"开":"关");
+     }
+    }
 }
