@@ -449,15 +449,15 @@ void MainWindow::status_time_update_timeout()
     switch (count)
     {
     case 0:
-       if(status_changeflag ==0) WriteToStm8(1030,data_buff[1030]);  break;
+    ;if(status_changeflag ==0) WriteToStm8(1030,data_buff[1030]);  break;
     case 1:
-       if(status_changeflag ==0) WriteToStm8(1031,data_buff[1031]);break;
+    ;if(status_changeflag ==0) WriteToStm8(1031,data_buff[1031]);break;
     case 2:
-       if(status_changeflag ==0) WriteToStm8(1032,data_buff[1032]);break;
+    ;if(status_changeflag ==0) WriteToStm8(1032,data_buff[1032]);break;
     case 3:
-        if(status_changeflag ==1) WriteToStm8(1070,data_buff[1070]);
+    ;if(status_changeflag ==1) WriteToStm8(1070,data_buff[1070]);break;
     case 4:
-        if(status_changeflag ==2) WriteToStm8(1080,data_buff[1080]);
+    ;if(status_changeflag ==2) WriteToStm8(1080,data_buff[1080]);break;
     default:
         count=-1;
         status_time_update_timer->stop();
