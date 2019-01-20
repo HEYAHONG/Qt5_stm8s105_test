@@ -48,6 +48,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rule_current_beep_off,SIGNAL(clicked()),this,SLOT(rule_current_beep_off()));
     connect(ui->rule_current_relay_on,SIGNAL(clicked()),this,SLOT(rule_current_relay_on()));
     connect(ui->rule_current_relay_off,SIGNAL(clicked()),this,SLOT(rule_current_relay_off()));
+    connect(ui->rule_hour_1_write,SIGNAL(clicked()),this,SLOT(rule_hour_1_write()));
+    connect(ui->rule_hour_2_write,SIGNAL(clicked()),this,SLOT(rule_hour_2_write()));
+    connect(ui->rule_hour_flag_write,SIGNAL(clicked()),this,SLOT(rule_hour_flag_write()));
+    connect(ui->rule_minute_1_write,SIGNAL(clicked()),this,SLOT(rule_minute_1_write()));
+    connect(ui->rule_minute_2_write,SIGNAL(clicked()),this,SLOT(rule_minute_2_write()));
+    connect(ui->rule_minute_flag_write,SIGNAL(clicked()),this,SLOT(rule_minute_flag_write()));
     UpdateComInfo();
     {
      //限制文本框输入内容
@@ -55,6 +61,12 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->address->setValidator(new QIntValidator(0,1199, this));
      ui->value->setValidator(new QIntValidator(0,0xff, this));
      ui->rule_index->setValidator(new QIntValidator(1,16,this));
+     ui->rule_hour_1->setValidator(new QIntValidator(0,23,this));
+     ui->rule_hour_2->setValidator(new QIntValidator(0,23,this));
+     ui->rule_hour_flag->setValidator(new QIntValidator(0,7,this));
+     ui->rule_minute_1->setValidator(new QIntValidator(0,59,this));
+     ui->rule_minute_2->setValidator(new QIntValidator(0,59,this));
+     ui->rule_minute_flag->setValidator(new QIntValidator(0,7,this));
      //textedit设置滚动条
      ui->log->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
      ui->log->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -592,6 +604,41 @@ void MainWindow::rule_window_timer_timeout()
      if(rule_read_timer->isActive())
      {
         ui->rule_read->setEnabled(false);
+        {//小时输出
+         {
+         char temp[5];
+         sprintf(temp,"%d",data_buff[32*index+1]);
+         ui->rule_hour_1->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+2]);
+          ui->rule_hour_2->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+3]);
+          ui->rule_hour_flag->setText(temp);
+         }
+         }
+            {//分钟输出
+             {
+             char temp[5];
+             sprintf(temp,"%d",data_buff[32*index+4]);
+             ui->rule_minute_1->setText(temp);
+             }
+             {
+              char temp[5];
+              sprintf(temp,"%d",data_buff[32*index+5]);
+              ui->rule_minute_2->setText(temp);
+             }
+             {
+              char temp[5];
+              sprintf(temp,"%d",data_buff[32*index+6]);
+              ui->rule_minute_flag->setText(temp);
+             }
+
+             }
 
      }
      else
@@ -704,4 +751,65 @@ void MainWindow::rule_current_relay_off()
 
                               }
     WriteToStm8(32*index+31,0);
+}
+void MainWindow::rule_hour_1_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+1,atoi(ui->rule_hour_1->text().toStdString().data()));
+}
+void MainWindow::rule_hour_2_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+2,atoi(ui->rule_hour_2->text().toStdString().data()));
+}
+void MainWindow::rule_hour_flag_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+3,atoi(ui->rule_hour_flag->text().toStdString().data()));
+}
+
+void MainWindow::rule_minute_1_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+4,atoi(ui->rule_minute_1->text().toStdString().data()));
+}
+void MainWindow::rule_minute_2_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+5,atoi(ui->rule_minute_2->text().toStdString().data()));
+}
+void MainWindow::rule_minute_flag_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+6,atoi(ui->rule_minute_flag->text().toStdString().data()));
 }

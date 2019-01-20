@@ -93,6 +93,12 @@ public slots:
     void rule_current_beep_off();
     void rule_current_relay_on();
     void rule_current_relay_off();
+    void rule_hour_1_write();
+    void rule_hour_2_write();
+    void rule_hour_flag_write();
+    void rule_minute_1_write();
+    void rule_minute_2_write();
+    void rule_minute_flag_write();
 
 };
 
