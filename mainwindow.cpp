@@ -11,6 +11,10 @@ MainWindow::MainWindow(QWidget *parent) :
     status_time_update_timer=new QTimer(this);
     Stm8_addr=0x01;
     setWindowTitle("STM8S105");//设置标题
+    //禁止改变窗口大小
+    setWindowFlags(windowFlags()& ~Qt::WindowMaximizeButtonHint);
+    setFixedSize(this->width(), this->height());
+
     connect(ui->OpenCom,SIGNAL(clicked()),this,SLOT(OpenCom())); //配置打开按钮
     connect(ui->CloseCom,SIGNAL(clicked()),this,SLOT(CloseCom()));//配置关闭按钮
     connect(SerialPort,SIGNAL(readyRead()),this,SLOT(readyRead()));//配置准备读信号
