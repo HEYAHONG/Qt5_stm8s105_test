@@ -9,6 +9,8 @@ MainWindow::MainWindow(QWidget *parent) :
     SerialPort=new QSerialPort(this);
     status_timer = new QTimer(this);
     status_time_update_timer=new QTimer(this);
+    rule_window_timer=new QTimer(this);
+    rule_read_timer=new QTimer(this);
     Stm8_addr=0x01;
     setWindowTitle("STM8S105");//设置标题
     //禁止改变窗口大小
@@ -33,12 +35,20 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->savedata_buff,SIGNAL(clicked()),this,SLOT(savedata_buff()));
     connect(status_timer,SIGNAL(timeout()),this,SLOT(status_timer_timeout()));//关联状态窗口定时器
     connect(status_time_update_timer,SIGNAL(timeout()),this,SLOT(status_time_update_timeout()));
+    connect(ui->RuleBtn,SIGNAL(clicked()),this,SLOT(RuleBtn()));
+    connect(ui->Rule_exit,SIGNAL(clicked()),this,SLOT(Rule_Exit()));
+    connect(rule_window_timer,SIGNAL(timeout()),this,SLOT(rule_window_timer_timeout()));
+    connect(ui->rule_on,SIGNAL(clicked()),this,SLOT(rule_on()));
+    connect(ui->rule_off,SIGNAL(clicked()),this,SLOT(rule_off()));
+    connect(rule_read_timer,SIGNAL(timeout()),this,SLOT(rule_read_timer_timeout()));
+    connect(ui->rule_read,SIGNAL(clicked()),this,SLOT(rule_read()));
     UpdateComInfo();
     {
      //限制文本框输入内容
      ui->Stm8_addr->setValidator(new QIntValidator(0,0xff,this));
      ui->address->setValidator(new QIntValidator(0,1199, this));
      ui->value->setValidator(new QIntValidator(0,0xff, this));
+     ui->rule_index->setValidator(new QIntValidator(1,16,this));
      //textedit设置滚动条
      ui->log->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
      ui->log->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -47,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     ui->frame->setEnabled(false);
     ui->frame_1->setEnabled(false);
+    ui->frame_2->setEnabled(false);
     {//清空data_buff
      unsigned int i=0;
      for(i=0;i<sizeof(data_buff);i++)
@@ -126,6 +137,7 @@ void MainWindow::OpenCom()
      ui->CloseCom->setEnabled(false);
      ui->frame->setEnabled(false);
      ui->frame_1->setEnabled(false);
+     ui->frame_2->setEnabled(false);
      status_timer->stop();
  }
 }
@@ -146,6 +158,7 @@ void MainWindow::CloseCom()
        ui->CloseCom->setEnabled(false);
        ui->frame->setEnabled(false);
        ui->frame_1->setEnabled(false);
+       ui->frame_2->setEnabled(false);
        status_timer->stop();
    }
 }
@@ -403,7 +416,7 @@ void MainWindow::status_stop_timerbtn()
 }
 void MainWindow::status_start_timerbtn()
 {
-    status_timer->start(100);
+    status_timer->start(400);
     ui->status_start_timerbtn->setEnabled(false);
     ui->status_stop_timerbtn->setEnabled(true);
     ui->status_beep_off->setEnabled(false);
@@ -526,4 +539,85 @@ void MainWindow::savedata_buff()
     QFile   temp("data.bin");
     temp.open(QIODevice::WriteOnly);
     temp.write((char *)data_buff,sizeof(data_buff));
+}
+
+void MainWindow::RuleBtn()
+{
+ui->frame_2->setEnabled(true);
+ui->frame->setEnabled(false);
+rule_window_timer->start(200);
+
+
+}
+void MainWindow::Rule_Exit()
+{
+    ui->frame_2->setEnabled(false);
+    ui->frame->setEnabled(true);
+    rule_window_timer->stop();
+    rule_read_timer->stop();
+
+}
+void MainWindow::rule_window_timer_timeout()
+{
+
+    {
+        if(data_buff[4]) ui->label_14->setText("开");
+        else ui->label_14->setText("关");
+    }
+    {//更新读写状态
+     if(rule_read_timer->isActive())
+     {
+        ui->rule_read->setEnabled(false);
+
+     }
+     else
+     {
+         ui->rule_read->setEnabled(true);
+     }
+
+    }
+}
+
+void MainWindow::rule_on()
+{
+    WriteToStm8(4,1);
+}
+void MainWindow::rule_off()
+{
+    WriteToStm8(4,0);
+}
+
+void MainWindow::rule_read_timer_timeout()
+{
+static int count=6,index;
+index=atoi(ui->rule_index->text().toStdString().data());
+if(index<1 || index >16) {
+                            QMessageBox::about(this,"提示","规则引索错误");
+                            return;
+
+                          }
+if(IsReceived || !count)
+{
+    static int add=0;
+
+    if(!count) { //上次读取失败
+        if(add!=0) add--;
+    }
+    ReadFromStm8(32*index+add);
+    qDebug()<<"读取地址:"<<32*index+add;
+    add++;
+    if(add==32) {//读取完成
+        add=0;
+        rule_read_timer->stop();
+        }
+    count=6;
+
+
+}
+count--;
+
+}
+void MainWindow::rule_read()
+{
+rule_read_timer->start(300);
 }

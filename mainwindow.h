@@ -54,12 +54,16 @@ private:
     //状态编辑菜单定时器
     QTimer *status_timer;
     QTimer *status_time_update_timer;
+    //规则编辑定时器
+    QTimer *rule_window_timer;
+    QTimer *rule_read_timer;
 public slots:
     void OpenCom();
     void CloseCom();
     void readyRead(); //串口可以读
     void ReadBtn();
     void WriteBtn();
+
     void StatusBtn();
     //状态编辑菜单超时
     void status_timer_timeout();
@@ -72,8 +76,17 @@ public slots:
     void status_relay_off();
     void status_time_update();
     void status_time_update_timeout();
+
     void loaddata_buff();
     void savedata_buff();
+
+    void RuleBtn();
+    void Rule_Exit();
+    void rule_window_timer_timeout();
+    void rule_on();
+    void rule_off();
+    void rule_read_timer_timeout();
+    void rule_read();
 };
 
 #endif // MAINWINDOW_H
