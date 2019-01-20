@@ -42,6 +42,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rule_off,SIGNAL(clicked()),this,SLOT(rule_off()));
     connect(rule_read_timer,SIGNAL(timeout()),this,SLOT(rule_read_timer_timeout()));
     connect(ui->rule_read,SIGNAL(clicked()),this,SLOT(rule_read()));
+    connect(ui->rule_current_on,SIGNAL(clicked()),this,SLOT(rule_current_on()));
+    connect(ui->rule_current_off,SIGNAL(clicked()),this,SLOT(rule_current_off()));
+    connect(ui->rule_current_beep_on,SIGNAL(clicked()),this,SLOT(rule_current_beep_on()));
+    connect(ui->rule_current_beep_off,SIGNAL(clicked()),this,SLOT(rule_current_beep_off()));
+    connect(ui->rule_current_relay_on,SIGNAL(clicked()),this,SLOT(rule_current_relay_on()));
+    connect(ui->rule_current_relay_off,SIGNAL(clicked()),this,SLOT(rule_current_relay_off()));
     UpdateComInfo();
     {
      //限制文本框输入内容
@@ -546,6 +552,7 @@ void MainWindow::RuleBtn()
 ui->frame_2->setEnabled(true);
 ui->frame->setEnabled(false);
 rule_window_timer->start(200);
+ReadFromStm8(4);//读取总开关
 
 
 }
@@ -559,10 +566,27 @@ void MainWindow::Rule_Exit()
 }
 void MainWindow::rule_window_timer_timeout()
 {
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
 
-    {
+                              }
+    {//总开关状态
         if(data_buff[4]) ui->label_14->setText("开");
         else ui->label_14->setText("关");
+    }
+    {//当前规则开关状态
+       if(data_buff[32*index]) ui->label_17->setText("是");
+       else ui ->label_17->setText("否");
+    }
+    {//当前报警输出
+       if(data_buff[32*index+30]) ui->label_19->setText("启用");
+       else ui ->label_19->setText("关闭");
+    }
+    {//当前继电器输出
+       if(data_buff[32*index+31]) ui->label_20->setText("启用");
+       else ui ->label_20->setText("关闭");
     }
     {//更新读写状态
      if(rule_read_timer->isActive())
@@ -620,4 +644,64 @@ count--;
 void MainWindow::rule_read()
 {
 rule_read_timer->start(300);
+}
+void MainWindow::rule_current_on()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index,1);
+}
+void MainWindow::rule_current_off()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index,0);
+}
+void MainWindow::rule_current_beep_on()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+30,1);
+}
+void MainWindow::rule_current_beep_off()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+30,0);
+}
+void MainWindow::rule_current_relay_on()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+31,1);
+}
+void MainWindow::rule_current_relay_off()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+31,0);
 }

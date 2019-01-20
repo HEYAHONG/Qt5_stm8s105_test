@@ -87,6 +87,13 @@ public slots:
     void rule_off();
     void rule_read_timer_timeout();
     void rule_read();
+    void rule_current_on();
+    void rule_current_off();
+    void rule_current_beep_on();
+    void rule_current_beep_off();
+    void rule_current_relay_on();
+    void rule_current_relay_off();
+
 };
 
 #endif // MAINWINDOW_H
