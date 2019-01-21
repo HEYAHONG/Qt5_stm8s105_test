@@ -99,6 +99,17 @@ public slots:
     void rule_minute_1_write();
     void rule_minute_2_write();
     void rule_minute_flag_write();
+    void rule_second_1_write();
+    void rule_second_2_write();
+    void rule_second_flag_write();
+    void rule_adch_ain_1_write();
+    void rule_adch_ain_2_write();
+    void rule_adch_ain_flag_write();
+    void rule_adcl_ain_1_write();
+    void rule_adcl_ain_2_write();
+    void rule_adcl_ain_flag_write();
+    void rule_current_adc_din_on();
+    void rule_current_adc_din_off();
 
 };
 

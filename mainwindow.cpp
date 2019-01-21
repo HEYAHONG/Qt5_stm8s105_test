@@ -54,6 +54,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rule_minute_1_write,SIGNAL(clicked()),this,SLOT(rule_minute_1_write()));
     connect(ui->rule_minute_2_write,SIGNAL(clicked()),this,SLOT(rule_minute_2_write()));
     connect(ui->rule_minute_flag_write,SIGNAL(clicked()),this,SLOT(rule_minute_flag_write()));
+    connect(ui->rule_second_1_write,SIGNAL(clicked()),this,SLOT(rule_second_1_write()));
+    connect(ui->rule_second_2_write,SIGNAL(clicked()),this,SLOT(rule_second_2_write()));
+    connect(ui->rule_second_flag_write,SIGNAL(clicked()),this,SLOT(rule_second_flag_write()));
+    connect(ui->rule_adch_ain_1_write,SIGNAL(clicked()),this,SLOT(rule_adch_ain_1_write()));
+    connect(ui->rule_adch_ain_2_write,SIGNAL(clicked()),this,SLOT(rule_adch_ain_2_write()));
+    connect(ui->rule_adch_ain_flag_write,SIGNAL(clicked()),this,SLOT(rule_adch_ain_flag_write()));
+    connect(ui->rule_adcl_ain_1_write,SIGNAL(clicked()),this,SLOT(rule_adcl_ain_1_write()));
+    connect(ui->rule_adcl_ain_2_write,SIGNAL(clicked()),this,SLOT(rule_adcl_ain_2_write()));
+    connect(ui->rule_adcl_ain_flag_write,SIGNAL(clicked()),this,SLOT(rule_adcl_ain_flag_write()));
+    connect(ui->rule_current_adc_din_on,SIGNAL(clicked()),this,SLOT(rule_current_adc_din_on()));
+    connect(ui->rule_current_adc_din_off,SIGNAL(clicked()),this,SLOT(rule_current_adc_din_off()));
     UpdateComInfo();
     {
      //限制文本框输入内容
@@ -67,6 +78,13 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->rule_minute_1->setValidator(new QIntValidator(0,59,this));
      ui->rule_minute_2->setValidator(new QIntValidator(0,59,this));
      ui->rule_minute_flag->setValidator(new QIntValidator(0,7,this));
+     ui->rule_second_1->setValidator(new QIntValidator(0,59,this));
+     ui->rule_second_2->setValidator(new QIntValidator(0,59,this));
+     ui->rule_second_flag->setValidator(new QIntValidator(0,7,this));
+     ui->rule_adc_ain_1->setValidator(new QIntValidator(0,1023,this));
+     ui->rule_adc_ain_2->setValidator(new QIntValidator(0,1023,this));
+     ui->rule_adch_ain_flag->setValidator(new QIntValidator(0,7,this));
+     ui->rule_adcl_ain_flag->setValidator(new QIntValidator(0,7,this));
      //textedit设置滚动条
      ui->log->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
      ui->log->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -600,6 +618,10 @@ void MainWindow::rule_window_timer_timeout()
        if(data_buff[32*index+31]) ui->label_20->setText("启用");
        else ui ->label_20->setText("关闭");
     }
+    {//当ADC数字输出
+       if(data_buff[32*index+16]) ui->label_26->setText("启用");
+       else ui ->label_26->setText("关闭");
+    }
     {//更新读写状态
      if(rule_read_timer->isActive())
      {
@@ -639,6 +661,47 @@ void MainWindow::rule_window_timer_timeout()
              }
 
              }
+        {//秒输出
+         {
+         char temp[5];
+         sprintf(temp,"%d",data_buff[32*index+7]);
+         ui->rule_second_1->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+8]);
+          ui->rule_second_2->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+9]);
+          ui->rule_second_flag->setText(temp);
+         }
+
+         }
+        {//ADC输出
+         {
+         char temp[5];
+         sprintf(temp,"%d",data_buff[32*index+10]*256+data_buff[32*index+13]);
+         ui->rule_adc_ain_1->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+11]*256+data_buff[32*index+14]);
+          ui->rule_adc_ain_2->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+12]);
+          ui->rule_adch_ain_flag->setText(temp);
+         }
+         {
+             char temp[5];
+             sprintf(temp,"%d",data_buff[32*index+15]);
+             ui->rule_adcl_ain_flag->setText(temp);
+         }
+
+         }
 
      }
      else
@@ -812,4 +875,114 @@ void MainWindow::rule_minute_flag_write()
 
                               }
     WriteToStm8(32*index+6,atoi(ui->rule_minute_flag->text().toStdString().data()));
+}
+void MainWindow::rule_second_1_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+7,atoi(ui->rule_second_1->text().toStdString().data()));
+}
+void MainWindow::rule_second_2_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+8,atoi(ui->rule_second_2->text().toStdString().data()));
+}
+void MainWindow::rule_second_flag_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+9,atoi(ui->rule_second_flag->text().toStdString().data()));
+}
+void MainWindow::rule_adch_ain_1_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+10,atoi(ui->rule_adc_ain_1->text().toStdString().data())>>8);
+}
+void MainWindow::rule_adch_ain_2_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+11,atoi(ui->rule_adc_ain_2->text().toStdString().data())>>8);
+}
+void MainWindow::rule_adch_ain_flag_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+12,atoi(ui->rule_adch_ain_flag->text().toStdString().data()));
+}
+void MainWindow::rule_adcl_ain_1_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+13,atoi(ui->rule_adc_ain_1->text().toStdString().data())&0xff);
+}
+void MainWindow::rule_adcl_ain_2_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+14,atoi(ui->rule_adc_ain_2->text().toStdString().data())&0xff);
+}
+void MainWindow::rule_adcl_ain_flag_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+15,atoi(ui->rule_adcl_ain_flag->text().toStdString().data()));
+}
+void MainWindow::rule_current_adc_din_on()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+16,1);
+}
+void MainWindow::rule_current_adc_din_off()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+16,0);
 }
