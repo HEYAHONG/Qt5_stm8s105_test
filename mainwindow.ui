@@ -1365,6 +1365,188 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+    <widget class="QLabel" name="label_28">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>290</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>温度（C）：</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="rule_T_1_write">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>290</y>
+       <width>61</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string> 写界限1</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="rule_T_1">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>290</y>
+       <width>21</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="rule_T_2_write">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>290</y>
+       <width>61</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string> 写界限2</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="rule_T_flag">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>290</y>
+       <width>21</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="rule_T_2">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>290</y>
+       <width>21</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="rule_T_flag_write">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>290</y>
+       <width>71</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string> 写标志位</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="rule_W_1">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>320</y>
+       <width>21</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="rule_W_flag">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>320</y>
+       <width>21</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="rule_W_flag_write">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>320</y>
+       <width>71</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string> 写标志位</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="rule_W_1_write">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>320</y>
+       <width>61</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string> 写界限1</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="rule_W_2_write">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>320</y>
+       <width>61</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string> 写界限2</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_29">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>320</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>空气湿度(%)：</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="rule_W_2">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>320</y>
+       <width>21</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

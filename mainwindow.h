@@ -110,7 +110,12 @@ public slots:
     void rule_adcl_ain_flag_write();
     void rule_current_adc_din_on();
     void rule_current_adc_din_off();
-
+    void rule_T_1_write();
+    void rule_T_2_write();
+    void rule_T_flag_write();
+    void rule_W_1_write();
+    void rule_W_2_write();
+    void rule_W_flag_write();
 };
 
 #endif // MAINWINDOW_H

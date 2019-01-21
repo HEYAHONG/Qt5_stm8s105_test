@@ -65,6 +65,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rule_adcl_ain_flag_write,SIGNAL(clicked()),this,SLOT(rule_adcl_ain_flag_write()));
     connect(ui->rule_current_adc_din_on,SIGNAL(clicked()),this,SLOT(rule_current_adc_din_on()));
     connect(ui->rule_current_adc_din_off,SIGNAL(clicked()),this,SLOT(rule_current_adc_din_off()));
+    connect(ui->rule_T_1_write,SIGNAL(clicked()),this,SLOT(rule_T_1_write()));
+    connect(ui->rule_T_2_write,SIGNAL(clicked()),this,SLOT(rule_T_2_write()));
+    connect(ui->rule_T_flag_write,SIGNAL(clicked()),this,SLOT(rule_T_flag_write()));
+    connect(ui->rule_W_1_write,SIGNAL(clicked()),this,SLOT(rule_W_1_write()));
+    connect(ui->rule_W_2_write,SIGNAL(clicked()),this,SLOT(rule_W_2_write()));
+    connect(ui->rule_W_flag_write,SIGNAL(clicked()),this,SLOT(rule_W_flag_write()));
     UpdateComInfo();
     {
      //限制文本框输入内容
@@ -85,6 +91,12 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->rule_adc_ain_2->setValidator(new QIntValidator(0,1023,this));
      ui->rule_adch_ain_flag->setValidator(new QIntValidator(0,7,this));
      ui->rule_adcl_ain_flag->setValidator(new QIntValidator(0,7,this));
+     ui->rule_T_1->setValidator(new QIntValidator(0,99,this));
+     ui->rule_T_2->setValidator(new QIntValidator(0,99,this));
+     ui->rule_T_flag->setValidator(new QIntValidator(0,7,this));
+     ui->rule_W_1->setValidator(new QIntValidator(0,99,this));
+     ui->rule_W_2->setValidator(new QIntValidator(0,99,this));
+     ui->rule_W_flag->setValidator(new QIntValidator(0,7,this));
      //textedit设置滚动条
      ui->log->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
      ui->log->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -702,7 +714,40 @@ void MainWindow::rule_window_timer_timeout()
          }
 
          }
-
+        {//温度输出
+         {
+         char temp[5];
+         sprintf(temp,"%d",data_buff[32*index+17]);
+         ui->rule_T_1->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+18]);
+          ui->rule_T_2->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+19]);
+          ui->rule_T_flag->setText(temp);
+         }
+        }
+        {//湿度输出
+         {
+         char temp[5];
+         sprintf(temp,"%d",data_buff[32*index+23]);
+         ui->rule_W_1->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+24]);
+          ui->rule_W_2->setText(temp);
+         }
+         {
+          char temp[5];
+          sprintf(temp,"%d",data_buff[32*index+25]);
+          ui->rule_W_flag->setText(temp);
+         }
+        }
      }
      else
      {
@@ -985,4 +1030,65 @@ void MainWindow::rule_current_adc_din_off()
 
                               }
     WriteToStm8(32*index+16,0);
+}
+
+void MainWindow::rule_T_1_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+17,atoi(ui->rule_T_1->text().toStdString().data()));
+}
+void MainWindow::rule_T_2_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+18,atoi(ui->rule_T_2->text().toStdString().data()));
+}
+void MainWindow::rule_T_flag_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+19,atoi(ui->rule_T_flag->text().toStdString().data()));
+}
+void MainWindow::rule_W_1_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+23,atoi(ui->rule_W_1->text().toStdString().data()));
+}
+void MainWindow::rule_W_2_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+24,atoi(ui->rule_W_2->text().toStdString().data()));
+}
+void MainWindow::rule_W_flag_write()
+{
+    int index=atoi(ui->rule_index->text().toStdString().data());
+    if(index<1 || index >16) {
+                                QMessageBox::about(NULL,"提示","规则引索错误");
+                                return;
+
+                              }
+    WriteToStm8(32*index+25,atoi(ui->rule_W_flag->text().toStdString().data()));
 }
