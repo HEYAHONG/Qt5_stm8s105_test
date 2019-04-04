@@ -464,7 +464,7 @@ void MainWindow::status_stop_timerbtn()
 }
 void MainWindow::status_start_timerbtn()
 {
-    status_timer->start(400);
+    status_timer->start(10);
     ui->status_start_timerbtn->setEnabled(false);
     ui->status_stop_timerbtn->setEnabled(true);
     ui->status_beep_off->setEnabled(false);
@@ -479,26 +479,26 @@ unsigned status_changeflag=0;//状态窗口中改变的设置类型标志位
 void MainWindow::status_beep_off()
 {
     data_buff[1070]=0;
-    status_time_update_timer->start(100);
+    status_time_update_timer->start(10);
     status_changeflag=1;
 
 }
 void MainWindow::status_beep_on()
 {
     data_buff[1070]=1;
-    status_time_update_timer->start(100);
+    status_time_update_timer->start(10);
     status_changeflag=1;
 }
 void MainWindow::status_relay_off()
 {
     data_buff[1080]=0;
-    status_time_update_timer->start(100);
+    status_time_update_timer->start(10);
     status_changeflag=2;
 }
 void MainWindow::status_relay_on()
 {
     data_buff[1080]=1;
-    status_time_update_timer->start(100);
+    status_time_update_timer->start(10);
     status_changeflag=2;
 }
 void MainWindow::status_time_update()
@@ -512,7 +512,7 @@ void MainWindow::status_time_update()
     data_buff[1030]=nhour;
     data_buff[1031]=nminute;
     data_buff[1032]=nsecond;
-    status_time_update_timer->start(100);
+    status_time_update_timer->start(10);
     status_changeflag=0;
 
 
@@ -593,7 +593,7 @@ void MainWindow::RuleBtn()
 {
 ui->frame_2->setEnabled(true);
 ui->frame->setEnabled(false);
-rule_window_timer->start(200);
+rule_window_timer->start(10);
 ReadFromStm8(4);//读取总开关
 
 
@@ -798,7 +798,7 @@ count--;
 }
 void MainWindow::rule_read()
 {
-rule_read_timer->start(300);
+rule_read_timer->start(10);
 }
 void MainWindow::rule_current_on()
 {
