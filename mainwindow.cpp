@@ -247,6 +247,7 @@ void MainWindow::OpenCom()
 
   //SerialPort->setSocketDescriptor(SerialPort->socketDescriptor(),QBluetoothServiceInfo::RfcommProtocol,QBluetoothSocket::BoundState);
   SerialPort->connectToService(QBluetoothAddress(ui->cmbPortName->currentText()),1);
+  qDebug()<<"本地地址:"<<SerialPort->localAddress();
   qDebug()<<SerialPort->errorString();
   QThread::msleep(1000);
  if(SerialPort->isOpen()) //更新按键信息
@@ -298,7 +299,7 @@ void MainWindow::readyRead()
 {
 
 
-if(read_timer_count>15) read_pos=0;
+if(read_timer_count>3) read_pos=0;
 qDebug()<<"准备接收数据!";
 QByteArray Data=SerialPort->readAll();
 //将接收的数据在控制台DeBug打印 。
