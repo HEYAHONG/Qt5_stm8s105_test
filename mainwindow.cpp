@@ -289,7 +289,7 @@ void MainWindow::readyRead()
 
 if(SerialPort->bytesAvailable()<7) return;
 qDebug()<<"准备接收数据!";
-static QByteArray Data=SerialPort->readAll();
+QByteArray Data=SerialPort->readAll();
 
  //将接收的数据在控制台DeBug打印。
 if(Data.size()!=0)
@@ -319,11 +319,11 @@ if(Data.size()!=0)
         IsReceived=true;
 
     }
-    //SerialPort->readAll();
 }
 Data.clear();
 //SerialPort->clearError();
 //SerialPort->clear();
+SerialPort->readAll();
 
 }
 unsigned int MainWindow::CRC16(unsigned char *arr_buff,unsigned char len)
