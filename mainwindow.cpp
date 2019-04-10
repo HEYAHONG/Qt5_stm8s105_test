@@ -6,7 +6,32 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    SerialPort=new QSerialPort(this);
+
+    localbluetooth =new QBluetoothLocalDevice(this);
+    localbluetooth->powerOn();
+    localbluetooth->setHostMode(QBluetoothLocalDevice::HostDiscoverable);
+    QThread::msleep(500);
+    if(!localbluetooth->isValid()) qDebug()<<"没有可用的蓝牙设备!";
+
+    discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
+    connect(discoveryAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
+                this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
+    connect(discoveryAgent, SIGNAL(finished()),
+                this, SLOT(devicefinished()));
+
+    discoveryAgent->start();
+    SeriveAgent=new QBluetoothServiceDiscoveryAgent();
+    connect(SeriveAgent, SIGNAL(serviceDiscovered(QBluetoothServiceInfo)),
+            this, SLOT(serviceDiscovered(QBluetoothServiceInfo)));
+
+
+
+    //SerialPort=new QSerialPort(this);
+    SerialPort = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
+    connect(SerialPort, SIGNAL(connected()), this, SLOT(connected()));
+    connect(SerialPort, SIGNAL(disconnected()), this, SLOT(disconnected()));
+    connect(SerialPort,SIGNAL(readyRead()),this,SLOT(readyRead()));//配置准备读信号
+
     status_timer = new QTimer(this);
     status_time_update_timer=new QTimer(this);
     rule_window_timer=new QTimer(this);
@@ -19,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->OpenCom,SIGNAL(clicked()),this,SLOT(OpenCom())); //配置打开按钮
     connect(ui->CloseCom,SIGNAL(clicked()),this,SLOT(CloseCom()));//配置关闭按钮
-    connect(SerialPort,SIGNAL(readyRead()),this,SLOT(readyRead()));//配置准备读信号
     connect(ui->Write,SIGNAL(clicked()),this,SLOT(WriteBtn()));
     connect(ui->Read,SIGNAL(clicked()),this,SLOT(ReadBtn()));
     connect(ui->StatusBtn,SIGNAL(clicked()),this,SLOT(StatusBtn()));
@@ -71,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rule_W_1_write,SIGNAL(clicked()),this,SLOT(rule_W_1_write()));
     connect(ui->rule_W_2_write,SIGNAL(clicked()),this,SLOT(rule_W_2_write()));
     connect(ui->rule_W_flag_write,SIGNAL(clicked()),this,SLOT(rule_W_flag_write()));
-    UpdateComInfo();
+    //UpdateComInfo();
     {
      //限制文本框输入内容
      ui->Stm8_addr->setValidator(new QIntValidator(0,0xff,this));
@@ -119,6 +143,45 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::deviceDiscovered(const QBluetoothDeviceInfo &device)
+{
+qDebug() << "Found new device:" << device.name() << '(' << device.address().toString() << ')';
+ui->cmbPortName->addItem(device.address().toString());
+}
+void MainWindow::devicefinished()
+{
+SeriveAgent->start(QBluetoothServiceDiscoveryAgent::FullDiscovery);
+}
+void MainWindow::serviceDiscovered(const QBluetoothServiceInfo &serviceInfo)
+{
+    qDebug() << "Discovered service on"
+             << serviceInfo.device().name() << serviceInfo.device().address().toString();
+    qDebug() << "\tService name:" << serviceInfo.serviceName();
+    qDebug() << "\tDescription:"
+             << serviceInfo.attribute(QBluetoothServiceInfo::ServiceDescription).toString();
+    qDebug() << "\tProvider:"
+             << serviceInfo.attribute(QBluetoothServiceInfo::ServiceProvider).toString();
+    qDebug() << "\tL2CAP protocol service multiplexer:"
+             << serviceInfo.protocolServiceMultiplexer();
+    qDebug() << "\tRFCOMM server channel:" << serviceInfo.serverChannel();
+
+}
+void MainWindow::connected()
+{
+    ui->OpenCom->setEnabled(false);
+    ui->CloseCom->setEnabled(true);
+    ui->frame->setEnabled(true);
+}
+void MainWindow::disconnected()
+{
+
+    ui->OpenCom->setEnabled(true);
+    ui->CloseCom->setEnabled(false);
+    ui->frame->setEnabled(false);
+    ui->frame_1->setEnabled(false);
+    ui->frame_2->setEnabled(false);
+    status_timer->stop();
+}
 void MainWindow::UpdateComInfo() //更新串口信息
 {
 
@@ -146,6 +209,7 @@ void MainWindow::UpdateComInfo() //更新串口信息
 void MainWindow::OpenCom()
 {
 // 设置串口号
+ /*
  SerialPort->setPortName(ui->cmbPortName->currentText());
  if(SerialPort->open(QIODevice::ReadWrite)) //判断是否打开
  {
@@ -159,20 +223,27 @@ void MainWindow::OpenCom()
      SerialPort->setFlowControl(QSerialPort::NoFlowControl);
      //设置停止位
      SerialPort->setStopBits(QSerialPort::OneStop);
-    /*
+   */ /*
      {   //测试modbus
          unsigned char data[8]={0x01,0x03,0x03,0xff,0x00,0x01,0x00,0x00};
          SerialPort->write((char *)data,8);
 
      }
      */
-
+/*
  }
  else
  {
      QMessageBox::about(NULL, "提示", "串口没有打开！");
      return;
  }
+ */
+  QBluetoothUuid uuid(QBluetoothUuid::Rfcomm);
+
+  //SerialPort->setSocketDescriptor(SerialPort->socketDescriptor(),QBluetoothServiceInfo::RfcommProtocol,QBluetoothSocket::BoundState);
+  SerialPort->connectToService(QBluetoothAddress(ui->cmbPortName->currentText()),1);
+  qDebug()<<SerialPort->errorString();
+  QThread::msleep(1000);
  if(SerialPort->isOpen()) //更新按键信息
  {
      ui->OpenCom->setEnabled(false);
@@ -188,6 +259,7 @@ void MainWindow::OpenCom()
      ui->frame_2->setEnabled(false);
      status_timer->stop();
  }
+
 }
 void MainWindow::CloseCom()
 {
@@ -215,8 +287,9 @@ void MainWindow::readyRead()
 {
 
 
-//读取串口数据
-QByteArray Data=SerialPort->readAll();
+if(SerialPort->bytesAvailable()<7) return;
+qDebug()<<"准备接收数据!";
+static QByteArray Data=SerialPort->readAll();
 
  //将接收的数据在控制台DeBug打印。
 if(Data.size()!=0)
@@ -246,10 +319,11 @@ if(Data.size()!=0)
         IsReceived=true;
 
     }
+    //SerialPort->readAll();
 }
 Data.clear();
-SerialPort->clearError();
-SerialPort->clear();
+//SerialPort->clearError();
+//SerialPort->clear();
 
 }
 unsigned int MainWindow::CRC16(unsigned char *arr_buff,unsigned char len)

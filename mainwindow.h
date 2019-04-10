@@ -1,16 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#ifdef WIN32
- #include <windows.h>
- #include <conio.h> // for console I/O
- #define sleep(x) Sleep(1000 * (x))
- #define msleep(x) Sleep(x)
- #define CLEAR_TERM system("CLS");
-#else
- #include <unistd.h>
- #define msleep(x) usleep(1000 * (x))
- #define CLEAR_TERM system("clear");
-#endif
+
 
 #include <queue>
 #include <QMainWindow>
@@ -22,6 +12,11 @@
 #include <QTimer>
 #include <QTime>
 #include <QFile>
+#include <QBluetoothAddress>
+#include <QBluetoothSocket>
+#include <QBluetoothDeviceDiscoveryAgent>
+#include <QBluetoothServiceDiscoveryAgent>
+#include <QtBluetooth>
 
 namespace Ui {
 class MainWindow;
@@ -35,7 +30,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void UpdateComInfo();
-    QSerialPort *SerialPort;
+    //QSerialPort *SerialPort;
+    QBluetoothLocalDevice * localbluetooth;
+    QBluetoothDeviceDiscoveryAgent *discoveryAgent;
+    QBluetoothSocket *SerialPort;
+    QBluetoothServiceDiscoveryAgent *SeriveAgent;
     unsigned int CRC16(unsigned char * arr_buff,unsigned char len);
     //读写STM8的EEPROM
     unsigned char WriteToStm8(unsigned int address,unsigned char data);
@@ -58,6 +57,11 @@ private:
     QTimer *rule_window_timer;
     QTimer *rule_read_timer;
 public slots:
+    void deviceDiscovered(const QBluetoothDeviceInfo &device);
+    void devicefinished();
+    void serviceDiscovered(const QBluetoothServiceInfo &serviceInfo);
+    void connected();
+    void disconnected();
     void OpenCom();
     void CloseCom();
     void readyRead(); //串口可以读
