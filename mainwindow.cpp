@@ -36,6 +36,11 @@ MainWindow::MainWindow(QWidget *parent) :
     status_time_update_timer=new QTimer(this);
     rule_window_timer=new QTimer(this);
     rule_read_timer=new QTimer(this);
+
+    read_timeout_timer=new QTimer(this);
+    connect(read_timeout_timer,SIGNAL(timeout()),this,SLOT(read_timer_timeout()));
+    read_timer_count=0;
+    read_timeout_timer->start(1);
     Stm8_addr=0x01;
     setWindowTitle("STM8S105");//设置标题
     //禁止改变窗口大小
@@ -283,47 +288,64 @@ void MainWindow::CloseCom()
    }
 }
 
+void MainWindow::read_timer_timeout()
+{
+
+    read_timer_count++;
+
+}
 void MainWindow::readyRead()
 {
 
 
-if(SerialPort->bytesAvailable()<7) return;
+if(read_timer_count>15) read_pos=0;
 qDebug()<<"准备接收数据!";
 QByteArray Data=SerialPort->readAll();
-
- //将接收的数据在控制台DeBug打印。
-if(Data.size()!=0)
-{
-
-    qDebug() <<Data.toHex().toStdString().data();
-    ui->log->appendPlainText("接收:");
-    ui->log->appendPlainText(Data.toHex().data());
-    if(Data.size()>=6)
-    {
+//将接收的数据在控制台DeBug打印 。
+qDebug() <<Data.toHex().toStdString().data();
+ui->log->appendPlainText("接收:");
+ui->log->appendPlainText(Data.toHex().data());
+       {
         unsigned char * temp=(unsigned char *)Data.data();
-        Stm8_addr=temp[0];
-        if(temp[1]==03)//03 代码
+        for(int i=0;i<Data.size();i++)
         {
-          data_buff[curr_address]=temp[4];
-          char temp_char[5];
-          sprintf(temp_char,"%d",temp[4]);
-          ui->value->setText(temp_char);
+            read_buff[read_pos+i]=temp[i];
         }
-        if(temp[1]==06)//06 代码
-        {
-          data_buff[curr_address]=temp[5];
-          char temp_char[5];
-          sprintf(temp_char,"%d",temp[5]);
-          ui->value->setText(temp_char);
+        read_pos+=Data.size();
         }
-        IsReceived=true;
 
-    }
-}
+
+        if(read_pos>=7)
+        if(read_buff[1]==03)//03 代码
+        {
+          data_buff[curr_address]=read_buff[4];
+          char temp_char[5];
+          sprintf(temp_char,"%d",read_buff[4]);
+          ui->value->setText(temp_char);
+           IsReceived=true;
+           read_pos=0;
+        }
+        if(read_pos>=8)
+        {
+        if(read_buff[1]==06)//06 代码
+        {
+          data_buff[curr_address]=read_buff[5];
+          char temp_char[5];
+          sprintf(temp_char,"%d",read_buff[5]);
+          ui->value->setText(temp_char);
+           IsReceived=true;
+
+        }
+        read_pos=0;
+        }
+
+
+
 Data.clear();
+read_timer_count=0;
 //SerialPort->clearError();
 //SerialPort->clear();
-SerialPort->readAll();
+//SerialPort->readAll();
 
 }
 unsigned int MainWindow::CRC16(unsigned char *arr_buff,unsigned char len)
@@ -538,7 +560,7 @@ void MainWindow::status_stop_timerbtn()
 }
 void MainWindow::status_start_timerbtn()
 {
-    status_timer->start(10);
+    status_timer->start(50);
     ui->status_start_timerbtn->setEnabled(false);
     ui->status_stop_timerbtn->setEnabled(true);
     ui->status_beep_off->setEnabled(false);
@@ -553,26 +575,26 @@ unsigned status_changeflag=0;//状态窗口中改变的设置类型标志位
 void MainWindow::status_beep_off()
 {
     data_buff[1070]=0;
-    status_time_update_timer->start(10);
+    status_time_update_timer->start(50);
     status_changeflag=1;
 
 }
 void MainWindow::status_beep_on()
 {
     data_buff[1070]=1;
-    status_time_update_timer->start(10);
+    status_time_update_timer->start(50);
     status_changeflag=1;
 }
 void MainWindow::status_relay_off()
 {
     data_buff[1080]=0;
-    status_time_update_timer->start(10);
+    status_time_update_timer->start(50);
     status_changeflag=2;
 }
 void MainWindow::status_relay_on()
 {
     data_buff[1080]=1;
-    status_time_update_timer->start(10);
+    status_time_update_timer->start(50);
     status_changeflag=2;
 }
 void MainWindow::status_time_update()
@@ -586,7 +608,7 @@ void MainWindow::status_time_update()
     data_buff[1030]=nhour;
     data_buff[1031]=nminute;
     data_buff[1032]=nsecond;
-    status_time_update_timer->start(10);
+    status_time_update_timer->start(50);
     status_changeflag=0;
 
 
@@ -667,7 +689,7 @@ void MainWindow::RuleBtn()
 {
 ui->frame_2->setEnabled(true);
 ui->frame->setEnabled(false);
-rule_window_timer->start(10);
+rule_window_timer->start(50);
 ReadFromStm8(4);//读取总开关
 
 
@@ -872,7 +894,7 @@ count--;
 }
 void MainWindow::rule_read()
 {
-rule_read_timer->start(10);
+rule_read_timer->start(50);
 }
 void MainWindow::rule_current_on()
 {

@@ -50,6 +50,11 @@ private:
     unsigned char Stm8_addr;
     //从STM8读取的数据将存在此数组
     unsigned char data_buff[1200];
+    unsigned char read_buff[100];
+
+    QTimer *read_timeout_timer;
+    int read_timer_count;
+    int read_pos;
     //状态编辑菜单定时器
     QTimer *status_timer;
     QTimer *status_time_update_timer;
@@ -65,6 +70,7 @@ public slots:
     void OpenCom();
     void CloseCom();
     void readyRead(); //串口可以读
+    void read_timer_timeout();
     void ReadBtn();
     void WriteBtn();
 
